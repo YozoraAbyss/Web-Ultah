@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ucapan Ulang Tahun 🎉</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      overflow: hidden;
+    }
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 400px;
+      animation: fadeIn 2s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .card h1 {
+      color: #ff4081;
+      margin-bottom: 10px;
+      overflow: hidden;
+      border-right: .15em solid #ff4081;
+      white-space: nowrap;
+      margin: 0 auto;
+      letter-spacing: .05em;
+      animation: typing 4s steps(30, end), blink .8s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: #ff4081; }
+    }
+    .card p {
+      margin: 10px 0;
+      color: #444;
+    }
+    .btn {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      background: #ff4081;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .btn:hover { background: #e91e63; transform: scale(1.05); box-shadow: 0 0 15px rgba(233,30,99,0.5); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .balloon {
+      position: absolute;
+      bottom: -150px;
+      width: 60px;
+      height: 80px;
+      background: #ff6f91;
+      border-radius: 50% 50% 50% 50%;
+      animation: floatUp 10s linear infinite;
+      z-index: 1;
+    }
+    .balloon:before {
+      content: "";
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: #555;
+      transform: translateX(-50%);
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-120vh) scale(1.1); opacity: 0; }
+    }
+    canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+    /* Animasi pesan rahasia */
+    #secretMessage {
+      display: none;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #e91e63;
+      opacity: 0;
+      transform: translateY(20px) scale(0.9);
+      transition: all 0.8s ease;
+      position: relative;
+      text-shadow: 0 0 10px rgba(233,30,99,0.5);
+      white-space: pre-wrap;
+    }
+    #secretMessage.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    /* Glitter effect */
+    .glitter {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0;
+      animation: sparkle 2s infinite;
+      pointer-events: none;
+      box-shadow: 0 0 8px white;
+    }
+    @keyframes sparkle {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    .btn:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="card">
+    <h1>Selamat Ulang Tahun 🎂</h1>
+    <p>Semoga harimu penuh kebahagiaan, cinta, dan tawa! 🎉</p>
+    <p>Dari: Sahabatmu ❤️</p>
+    <button class="btn" onclick="startConfetti()">Rayakan 🎉</button>
+    <button class="btn" onclick="toggleMusic()">🎶 Musik</button>
+    <button class="btn" onclick="showMessage()">📜 Pesan Rahasia</button>
+    <p id="secretMessage"></p>
+  </div>
+
+  <div class="balloon" style="left:10%; animation-delay:0s;"></div>
+  <div class="balloon" style="left:30%; background:#ff9671; animation-delay:3s;"></div>
+  <div class="balloon" style="left:50%; background:#ffc75f; animation-delay:6s;"></div>
+  <div class="balloon" style="left:70%; background:#f9f871; animation-delay:1.5s;"></div>
+  <div class="balloon" style="left:90%; background:#c5cae9; animation-delay:4.5s;"></div>
+
+  <audio id="music" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-happyrock.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="chime">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3f61c1423a.mp3?filename=magic-chime-85982.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Confetti sederhana
+    const confettiCanvas = document.getElementById("confetti");
+    const ctx = confettiCanvas.getContext("2d");
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+    let confettis = [];
+
+    function startConfetti(){
+      for(let i=0;i<150;i++){
+        confettis.push({
+          x: Math.random()*confettiCanvas.width,
+          y: Math.random()*confettiCanvas.height - confettiCanvas.height,
+          r: Math.random()*6+2,
+          d: Math.random()*Math.PI*2,
+          c: `hsl(${Math.random()*360},100%,50%)`
+        });
+      }
+      const card = document.querySelector('.card');
+      card.style.transform = 'scale(1.05)';
+      card.style.boxShadow = '0 0 30px rgba(255,64,129,0.7)';
+      setTimeout(()=> {
+        card.style.transform = 'scale(1)';
+        card.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+      }, 800);
+    }
+    function drawConfetti(){
+      ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      confettis.forEach(c=>{
+        ctx.beginPath();
+        ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+        ctx.fillStyle=c.c;
+        ctx.fill();
+      });
+      updateConfetti();
+      requestAnimationFrame(drawConfetti);
+    }
+    function updateConfetti(){
+      confettis.forEach(c=>{
+        c.y+=2;
+        if(c.y>confettiCanvas.height) c.y = -10;
+      });
+    }
+    drawConfetti();
+
+    // Musik
+    let music = document.getElementById("music");
+    function toggleMusic(){
+      if(music.paused){ music.play(); } else { music.pause(); }
+    }
+
+    // Pesan rahasia dengan animasi mengetik + glitter + chime
+    const fullMessage = "Kamu adalah orang yang sangat spesial, semoga semua impianmu tercapai! 💖";
+    let typingInterval;
+
+    function showMessage(){
+      let msg = document.getElementById("secretMessage");
+      let chime = document.getElementById("chime");
+
+      if(msg.classList.contains("show")){
+        msg.classList.remove("show");
+        msg.textContent = "";
+        clearInterval(typingInterval);
+        setTimeout(()=> msg.style.display = "none", 800);
+      } else {
+        msg.style.display = "block";
+        setTimeout(()=> msg.classList.add("show"), 50);
+        msg.textContent = "";
+        let i = 0;
+        typingInterval = setInterval(()=>{
+          if(i < fullMessage.length){
+            msg.textContent += fullMessage.charAt(i);
+            i++;
+          } else {
+            clearInterval(typingInterval);
+          }
+        }, 50);
+        createGlitter(msg);
+        chime.play();
+      }
+    }
+
+    function createGlitter(element){
+      for(let i=0; i<15; i++){
+        let glitter = document.createElement("div");
+        glitter.classList.add("glitter");
+        glitter.style.left = (element.offsetLeft + Math.random()*element.offsetWidth) + "px";
+        glitter.style.top = (element.offsetTop + Math.random()*element.offsetHeight) + "px";
+        glitter.style.animationDelay = (Math.random()*2)+"s";
+        document.body.appendChild(glitter);
+        setTimeout(()=> glitter.remove(), 3000);
+      }
+    }
+  </script>
+</body>
+</html>
